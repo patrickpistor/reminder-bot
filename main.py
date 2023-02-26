@@ -1,33 +1,53 @@
+from keep_alive import keep_alive
 import discord
+import discord.ext
+from discord.utils import get
+from discord.ext import commands, tasks
+from discord.ext.commands import has_permissions, CheckFailure, check
 import os
-from discord.ext import commands
-from datetime import datetime, timedelta
+from discord_slash import SlashCommand
+from discord_slash import SlashContext
+from discord_slash.utils import manage_commands
+
+TOKEN = os.environ['TOKEN']
 
 client = discord.Client()
-token = os.environ['TOKEN']
-server = os.environ['SERVER']
+
+client = commands.Bot(command_prefix="!")
+slash = SlashCommand(client, sync_commands=True)
 
 
 @client.event
 async def on_ready():
-    guild = discord.utils.get(client.guilds, name="🔨The Toolbox")
-    print(guild)
-
-@client.event
-async def on_message(message):
-    if message.author == client.user:
-        return
-
-    if message.content.startswith('$hello'):
-        await message.channel.send('Hello!')
+    await client.change_presence(
+        status=discord.Status.online, activity=discord.Game(name='Discord')
+    )  #Bot status, change this to anything you like
+    print("Bot online")
 
 
-try:
-    client.run(token)
-except discord.HTTPException as e:
-    if e.status == 429:
-        print(
-            "The Discord servers denied the connection for making too many requests"
-        )
-    else:
-        raise e
+@slash.slash(name="ping", description="Ping Pong")
+async def _help(ctx: SlashContext):
+    await ctx.send(content="pong!")
+
+
+@slash.slash(
+    name="space",
+    description="Space your text",
+    options=[
+        manage_commands.create_option(  #create an arg
+            name="text",
+            description="The text to space",
+            option_type=3,
+            required=True)
+    ])
+async def _space(ctx: SlashContext, sentence):
+    newword = ""  #
+    for char in sentence:
+        newword = newword + char + "   "
+    await ctx.send(content=newword)
+
+
+keep_alive()
+
+#Run our bot
+client.run(TOKEN)

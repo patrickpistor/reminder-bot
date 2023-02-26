@@ -1,5 +1,6 @@
 { pkgs }: {
   deps = [
+    pkgs.sudo
     pkgs.python38Full
   ];
   env = {
@@ -12,7 +13,7 @@
       # Needed for matplotlib
       pkgs.xorg.libX11
     ];
-    PYTHONBIN = "${pkgs.python38Full}/bin/python3.8";
+    PYTHONBIN = "${pkgs.python310Full}/bin/python3.10";
     LANG = "en_US.UTF-8";
   };
 }
